@@ -34,7 +34,51 @@ class Demac_MultiLocationInventory_Model_Resource_Stock_Status_Index
         $coreStockItemUpdateQuery = Mage::helper('demac_multilocationinventory/indexer')->getUpdateCoreStockItemQuery($productIds);
         $this->_getWriteAdapter()->query($coreStockItemUpdateQuery);
     }
-
+    
+    /**
+     * _min_qty
+     * 
+     * (default value: array())
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $_min_qty = array();
+    
+    /**
+     * markMinQtyOutOfStock function.
+     * 
+     * @access public
+     * @param mixed $products
+     * @return void
+     */
+    public function markMinQtyOutOfStock($productIds)
+    {
+        $productFilter = '';
+        if($productIds !== false) {
+            $productFilter = 'AND dms.product_id IN(' . implode(',', $productIds) . ')';
+        }
+        
+        if(!$this->_min_qty)
+        {
+            $_minQtysResource = Mage::getResourceModel('demac_multilocationinventory/location_collection')
+                    ->addFieldToSelect(array('id','min_qty'))
+                    ->addFieldToFilter('status', 1);
+            foreach($_minQtysResource as $_minqtys)
+            {
+                $this->_min_qty[] = " ( dms.location_id = '" . $_minqtys->getId() . "' AND qty <= '" . $_minqtys->getMinQty() ."' )";
+            }
+        }
+        
+        if($this->_min_qty)
+        {
+            $query = "UPDATE " . $this->_getWriteAdapter()->getTableName('demac_multilocationinventory_stock') . " AS dms"
+                    . " SET dms.is_in_stock = '0' WHERE dms.is_in_stock = '1' " . $productFilter
+                    . " AND (" . implode(" OR ", $this->_min_qty) . ")" ;
+            $this->_getWriteAdapter()->query($query);
+        }
+    }
+    
     /**
      * Create missing multi location inventory stock rows.
      *

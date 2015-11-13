@@ -31,6 +31,9 @@ class Demac_MultiLocationInventory_Model_Stock_Status_Index
         $this->getResource()->createMissingStockRows($productIds);
         $this->getResource()->createMissingStockIndexRows($productIds);
 
+        // move min_qty stock correctly
+        $this->getResource()->markMinQtyOutOfStock($productIds);
+        
         $write = Mage::getSingleton('core/resource')->getConnection('core_write');
         //Add associated products (parent products, child products, etc)
         if($productIds !== false) {

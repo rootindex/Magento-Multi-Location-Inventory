@@ -145,6 +145,12 @@ class Demac_MultiLocationInventory_Block_Adminhtml_Location_Edit_Tab_Location ex
             'required' => false,
             'name'     => 'external_id',
         ));
+        
+        $fieldset->addField('min_qty', 'text', array(
+            'label'    => Mage::helper('demac_multilocationinventory')->__('Min Qty to move to Out Of Stock'),
+            'required' => false,
+            'name'     => 'min_qty',
+        ));
     }
 
     /**
