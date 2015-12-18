@@ -9,22 +9,29 @@
 
 /**
  * Class Demac_MultiLocationInventory_Model_CatalogInventory_Stock_Item
+ *
+ * @method Demac_MultiLocationInventory_Model_CatalogInventory_Resource_Stock_Item _getResource()
  */
 class Demac_MultiLocationInventory_Model_CatalogInventory_Stock_Item extends Mage_CatalogInventory_Model_Stock_Item
 {
     /**
-     * Before save prepare process
+     * Load item data by product
      *
-     * @return Demac_MultiLocationInventory_Model_CatalogInventory_Stock_Item
+     * @param   mixed $product
+     * @return  Mage_CatalogInventory_Model_Stock_Item
      */
-    protected function _beforeSave()
+    public function loadByProduct($product)
     {
-        parent::_beforeSave();
+        if ($product instanceof Mage_Catalog_Model_Product) {
 
-        Mage::dispatchEvent('model_save_before', array('object' => $this));
-        Mage::dispatchEvent($this->_eventPrefix . '_save_before', $this->_getEventData());
+            $this->_getResource()
+                ->loadByProduct($this, $product);
 
-        return $this;
+            $this->setOrigData();
+
+            return $this;
+        } else {
+            return parent::loadByProduct($product);
+        }
     }
-
 }
