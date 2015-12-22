@@ -15,6 +15,28 @@
 class Demac_MultiLocationInventory_Model_CatalogInventory_Stock_Item extends Mage_CatalogInventory_Model_Stock_Item
 {
     /**
+     * Adding stock data to product
+     *
+     * @param   Mage_Catalog_Model_Product $product
+     * @return  Mage_CatalogInventory_Model_Stock_Item
+     */
+    public function assignProduct(Mage_Catalog_Model_Product $product)
+    {
+        if (!$this->getId() || !$this->getProductId()) {
+            $this->_getResource()->loadByProduct($this, $product);
+            $this->setOrigData();
+        }
+
+        $this->setProduct($product);
+        $product->setStockItem($this);
+
+        $product->setIsInStock($this->getIsInStock());
+        Mage::getSingleton('cataloginventory/stock_status')
+            ->assignProduct($product, $this->getStockId(), $this->getStockStatus());
+        return $this;
+    }
+
+    /**
      * Load item data by product
      *
      * @param   mixed $product
